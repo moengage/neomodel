@@ -21,8 +21,8 @@ logger = logging.getLogger(__name__)
 # make sure the connection url has been set prior to executing the wrapped function
 def ensure_connection(func):
     def wrapper(self, *args, **kwargs):
-        if not self.url:
-            self.set_connection(config.DATABASE_URL)
+        if not self.driver:
+            self.set_connection()
         return func(self, *args, **kwargs)
 
     return wrapper
@@ -37,14 +37,14 @@ def clear_neo4j_database(db):
 
 
 class Database(local):
-    def __init__(self):
+    def __init__(self, url):
         self._active_transaction = None
-        self.url = None
+        self.url = url
         self.driver = None
         self._pid = None
 
-    def set_connection(self, url):
-        self.url = url
+    def set_connection(self):
+        url = self.url or config.DATABASE_URL
         u = urlparse(url)
 
         if u.netloc.find('@') > -1 and (u.scheme == 'bolt' or u.scheme == 'bolt+routing'):
