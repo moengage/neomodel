@@ -1,14 +1,25 @@
 from __future__ import print_function
-import warnings
+
 import sys
+import warnings
 
-from .exception import DoesNotExist
-from .properties import Property, PropertyManager
-from .hooks import hooks
-from .util import Database, classproperty, _UnsavedNode
 from . import config
+from .exception import DoesNotExist
+from .hooks import hooks
+from .properties import Property, PropertyManager
+from .util import Database, classproperty, _UnsavedNode
 
-db = Database()
+
+# db = Database()
+
+
+def get_database_from_cls(cls):
+    get_database = getattr(cls, "get_database", None)
+    if callable(get_database):
+        db = get_database()
+    else:
+        db = Database()
+    return db
 
 
 def install_labels(cls, quiet=True, stdout=None):
@@ -27,6 +38,8 @@ def install_labels(cls, quiet=True, stdout=None):
         if not quiet:
             stdout.write(' ! Skipping class {}.{} is abstract'.format(cls.__module__, cls.__name__))
         return
+
+    db = get_database_from_cls(cls)
 
     for key, prop in cls.defined_properties(aliases=False, rels=False).items():
         if prop.index:
@@ -201,6 +214,7 @@ class StructuredNode(NodeBase):
         :return: list containing query results
         :rtype: list
         """
+        db = get_database_from_cls(self)
         self._pre_action_check('cypher')
         params = params or {}
         params.update({'self': self.id})
@@ -220,7 +234,7 @@ class StructuredNode(NodeBase):
     @classmethod
     def category(cls):
         raise NotImplementedError("Category was deprecated and has now been removed, "
-            "the functionality is now achieved using the {}.nodes attribute".format(cls.__name__))
+                                  "the functionality is now achieved using the {}.nodes attribute".format(cls.__name__))
 
     @hooks
     def save(self):
@@ -296,7 +310,8 @@ class StructuredNode(NodeBase):
         """
         query_params = dict(merge_params=merge_params)
         n_merge = "n:{} {{{}}}".format(':'.join(cls.inherited_labels()),
-                                         ", ".join("{0}: params.create.{0}".format(p) for p in cls.__required_properties__))
+                                       ", ".join(
+                                           "{0}: params.create.{0}".format(p) for p in cls.__required_properties__))
         if relationship is None:
             # create "simple" unwind query
             query = "UNWIND {{merge_params}} as params\n MERGE ({})\n ".format(n_merge)
@@ -341,7 +356,7 @@ class StructuredNode(NodeBase):
         :type: bool
         :rtype: list
         """
-
+        db = get_database_from_cls(cls)
         if 'streaming' in kwargs:
             warnings.warn('streaming is not supported by bolt, please remove the kwarg',
                           category=DeprecationWarning, stacklevel=1)
@@ -384,6 +399,7 @@ class StructuredNode(NodeBase):
         :param lazy: False by default, specify True to get nodes with id only without the parameters.
         :rtype: list
         """
+        db = get_database_from_cls(cls)
         lazy = kwargs.get('lazy', False)
         relationship = kwargs.get('relationship')
 
@@ -413,6 +429,7 @@ class StructuredNode(NodeBase):
         :param lazy: False by default, specify True to get nodes with id only without the parameters.
         :rtype: list
         """
+        db = get_database_from_cls(cls)
         lazy = kwargs.get('lazy', False)
         relationship = kwargs.get('relationship')
 

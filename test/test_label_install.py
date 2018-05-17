@@ -1,7 +1,7 @@
 from neomodel import config, StructuredNode, StringProperty, install_all_labels, install_labels
-from neomodel.core import db
+from neomodel.core import get_database_from_cls
 
-
+db = get_database_from_cls(None)
 config.AUTO_INSTALL_LABELS = False
 
 

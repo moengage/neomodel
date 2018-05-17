@@ -1,5 +1,6 @@
-from neomodel import StructuredNode, StringProperty, db
 from multiprocessing import Pool
+
+from neomodel import StructuredNode, StringProperty
 
 
 class ThingyMaBob(StructuredNode):

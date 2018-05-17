@@ -37,7 +37,7 @@ def clear_neo4j_database(db):
 
 
 class Database(local):
-    def __init__(self, url):
+    def __init__(self, url=None):
         self._active_transaction = None
         self.url = url
         self.driver = None
