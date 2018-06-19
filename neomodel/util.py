@@ -86,7 +86,7 @@ class Database(local):
     @ensure_connection
     def cypher_query(self, query, params=None, handle_unique=True, retry_on_session_expire=False):
         if self._pid != os.getpid():
-            self.set_connection(self.url)
+            self.set_connection()
 
         if self._active_transaction:
             session = self._active_transaction
@@ -112,7 +112,7 @@ class Database(local):
                     raise exc_info[1]
         except SessionError:
             if retry_on_session_expire:
-                self.set_connection(self.url)
+                self.set_connection()
                 return self.cypher_query(query=query, params=params, handle_unique=handle_unique,
                                          retry_on_session_expire=False)
             raise

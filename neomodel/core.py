@@ -1,13 +1,14 @@
 from __future__ import print_function
 
 import sys
+
 import warnings
 
 from . import config
 from .exception import DoesNotExist
 from .hooks import hooks
 from .properties import Property, PropertyManager
-from .util import Database, classproperty, _UnsavedNode
+from .util import classproperty, _UnsavedNode
 
 
 # db = Database()
@@ -16,10 +17,7 @@ from .util import Database, classproperty, _UnsavedNode
 def get_database_from_cls(cls):
     get_database = getattr(cls, "get_database", None)
     if callable(get_database):
-        db = get_database()
-    else:
-        db = Database()
-    return db
+        return get_database()
 
 
 def install_labels(cls, quiet=True, stdout=None):
