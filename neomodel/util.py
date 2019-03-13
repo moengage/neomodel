@@ -21,8 +21,8 @@ logger = logging.getLogger(__name__)
 # make sure the connection url has been set prior to executing the wrapped function
 def ensure_connection(func):
     def wrapper(self, *args, **kwargs):
-        if not self.url:
-            self.set_connection(config.DATABASE_URL)
+        if not self.driver:
+            self.set_connection()
         return func(self, *args, **kwargs)
 
     return wrapper
@@ -37,14 +37,14 @@ def clear_neo4j_database(db):
 
 
 class Database(local):
-    def __init__(self):
+    def __init__(self, url=None):
         self._active_transaction = None
-        self.url = None
+        self.url = url
         self.driver = None
         self._pid = None
 
-    def set_connection(self, url):
-        self.url = url
+    def set_connection(self):
+        url = self.url or config.DATABASE_URL
         u = urlparse(url)
 
         if u.netloc.find('@') > -1 and (u.scheme == 'bolt' or u.scheme == 'bolt+routing'):
@@ -84,14 +84,17 @@ class Database(local):
         self._active_transaction = None
 
     @ensure_connection
-    def cypher_query(self, query, params=None, handle_unique=True, retry_on_session_expire=False):
+    def cypher_query(self, query, params=None, handle_unique=True, retry_on_session_expire=False, access_mode=None):
         if self._pid != os.getpid():
-            self.set_connection(self.url)
+            self.set_connection()
 
         if self._active_transaction:
             session = self._active_transaction
         else:
-            session = self.driver.session()
+            if not access_mode:
+                session = self.driver.session()
+            else:
+                session = self.driver.session(access_mode=access_mode)
 
         try:
             start = time.clock()
@@ -112,7 +115,7 @@ class Database(local):
                     raise exc_info[1]
         except SessionError:
             if retry_on_session_expire:
-                self.set_connection(self.url)
+                self.set_connection()
                 return self.cypher_query(query=query, params=params, handle_unique=handle_unique,
                                          retry_on_session_expire=False)
             raise

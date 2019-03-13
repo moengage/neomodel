@@ -1,7 +1,7 @@
-from .properties import Property, PropertyManager
-from .core import db
-from .util import deprecated
+from .core import get_database_from_cls
 from .hooks import hooks
+from .properties import Property, PropertyManager
+from .util import deprecated
 
 
 class RelationshipMeta(type):
@@ -27,6 +27,7 @@ class StructuredRel(StructuredRelBase):
     """
     Base class for relationship objects
     """
+
     def __init__(self, *args, **kwargs):
         super(StructuredRel, self).__init__(*args, **kwargs)
 
@@ -42,7 +43,7 @@ class StructuredRel(StructuredRelBase):
         for key in props:
             query += " SET r.{} = {{{}}}".format(key, key)
         props['self'] = self.id
-
+        db = get_database_from_cls(self)
         db.cypher_query(query, props)
 
         return self

@@ -1,15 +1,17 @@
 from __future__ import print_function
-import warnings
-import os
 
-from neomodel import config, db, clear_neo4j_database, change_neo4j_password
+import os
+import warnings
+
 from neo4j.v1 import CypherError
+
+from neomodel import config, clear_neo4j_database, change_neo4j_password, get_database_from_cls
 
 warnings.simplefilter('default')
 
 config.DATABASE_URL = os.environ.get('NEO4J_BOLT_URL', 'bolt://neo4j:neo4j@localhost:7687')
 config.AUTO_INSTALL_LABELS = True
-
+db = get_database_from_cls(None)
 try:
     clear_neo4j_database(db)
 except CypherError as ce:

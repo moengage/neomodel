@@ -1,8 +1,10 @@
-from .core import StructuredNode, db
+from .core import StructuredNode
 from .properties import AliasProperty
 from .exception import MultipleNodesReturned
 import inspect
 import re
+from neomodel.core import get_database_from_cls
+
 OUTGOING, INCOMING, EITHER = 1, -1, 0
 
 # basestring python 3.x fallback
@@ -395,6 +397,7 @@ class QueryBuilder(object):
         # drop order_by, results in an invalid query
         self._ast.pop('order_by', None)
         query = self.build_query()
+        db = get_database_from_cls(self)
         results, _ = db.cypher_query(query, self._query_params)
         return int(results[0][0])
 
@@ -408,6 +411,7 @@ class QueryBuilder(object):
 
     def _execute(self):
         query = self.build_query()
+        db = get_database_from_cls(self)
         results, _ = db.cypher_query(query, self._query_params)
         if results:
             return [self._ast['result_class'].inflate(n[0]) for n in results]

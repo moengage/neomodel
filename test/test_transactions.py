@@ -1,5 +1,8 @@
-from neomodel import db, StructuredNode, StringProperty, UniqueProperty
 from neo4j.addressing import AddressError
+
+from neomodel import StructuredNode, StringProperty, UniqueProperty, get_database_from_cls
+
+db = get_database_from_cls(None)
 
 
 class Person(StructuredNode):
@@ -78,7 +81,6 @@ def test_query_inside_transaction():
 
 def test_set_connection_works():
     assert Person(name='New guy').save()
-    from socket import gaierror
 
     old_url = db.url
     try:

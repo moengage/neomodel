@@ -1,10 +1,14 @@
+from datetime import datetime, date
+
+from pytz import timezone
+
+from neomodel import StructuredNode, get_database_from_cls
+from neomodel.exception import InflateError, DeflateError
 from neomodel.properties import (IntegerProperty, DateTimeProperty,
                                  NormalProperty, RegexProperty, EmailProperty,
                                  DateProperty, StringProperty, JSONProperty, UniqueIdProperty, ArrayProperty)
-from neomodel.exception import InflateError, DeflateError
-from neomodel import StructuredNode, db
-from pytz import timezone
-from datetime import datetime, date
+
+db = get_database_from_cls(None)
 
 
 class FooBar(object):
@@ -164,6 +168,7 @@ def test_default_valude_callable_type():
         class Foo(object):
             def __str__(self):
                 return "123"
+
         return Foo()
 
     class DefaultTestValueThree(StructuredNode):
@@ -180,6 +185,7 @@ def test_default_valude_callable_type():
 def test_independent_property_name():
     class TestNode(StructuredNode):
         name_ = StringProperty(db_property="name")
+
     x = TestNode()
     x.name_ = "jim"
     x.save()
@@ -258,7 +264,6 @@ def test_regex_property():
 
 
 def test_email_property():
-
     prop = EmailProperty()
     prop.name = 'email'
     prop.owner = object()
