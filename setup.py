@@ -1,8 +1,14 @@
 from setuptools import setup, find_packages
+from codecs import open
+
+with open('VERSION', encoding='utf-8') as f:
+    package_version = f.read()
+
+package_name = 'moe-neomodel'
 
 setup(
-    name='moe-neomodel',
-    version='3.2.4',
+    name=package_name,
+    version=package_version,
     description='An object mapper for the neo4j graph database.',
     long_description=open('README.rst').read(),
     author='Robin Edwards',
