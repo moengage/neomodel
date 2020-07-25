@@ -54,7 +54,7 @@ class Database(local):
             raise ValueError("Expecting url format: bolt://user:password@localhost:7687"
                              " got {}".format(url))
 
-        self.driver = GraphDatabase.driver(u.scheme + '://' + hostname,
+        self.driver = GraphDatabase.driver(self.url,
                                            auth=basic_auth(username, password),
                                            encrypted=config.ENCRYPTED_CONNECTION,
                                            max_pool_size=config.MAX_POOL_SIZE)
