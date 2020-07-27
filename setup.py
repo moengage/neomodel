@@ -6,6 +6,7 @@ with open('VERSION', encoding='utf-8') as f:
 
 package_name = 'moe-neomodel'
 
+
 setup(
     name=package_name,
     version=package_version,
